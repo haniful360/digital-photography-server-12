@@ -32,18 +32,24 @@ async function run() {
         await client.connect();
 
         // all collection
-        const usersCollection = client.db('photography').collection('users');
+        const studentsCollection = client.db('photography').collection('students');
 
 
         // users api
 
-        app.get('/users', async (req, res) => {
-            const result = await usersCollection.find().toArray();
+        app.get('/students', async (req, res) => {
+            const result = await studentsCollection.find().toArray();
             res.send(result);
         })
-        app.post('/users', async (req, res) => {
+        app.post('/students', async (req, res) => {
             const user = req.body;
-            const result = await usersCollection.insertOne(user);
+            // console.log(user);
+            const query = { email: user.email }
+            const existingUser = await studentsCollection.findOne(query);
+            if (existingUser) {
+               return res.send({ message: 'user already exists' })
+            }
+            const result = await studentsCollection.insertOne(user);
             res.send(result);
 
         })
