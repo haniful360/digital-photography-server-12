@@ -53,6 +53,7 @@ async function run() {
         const usersCollection = client.db('photography').collection('users');
         const instructorCollection = client.db('photography').collection('addClass');
 
+        // json web token
         app.post('/jwt', async (req, res) => {
             const user = req.body;
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
@@ -63,12 +64,37 @@ async function run() {
         })
 
 
+        // add class api
+
+        app.get('/instructor', async (req, res) => {
+            let query = {};
+            if (req.query?.email) {
+                query = { email: req.query.email }
+            }
+            const result = await instructorCollection.find(query).toArray();
+            res.send(result);
+            
+        })
+        app.get('/addClass/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await instructorCollection.findOne(query);
+            res.send(result);
+        })
+
+        app.get('/addClass', async (req, res) => {
+            const result = await instructorCollection.find().toArray();
+            res.send(result);
+        })
+
         app.post('/addClass', async (req, res) => {
             const newClass = req.body;
             const result = await instructorCollection.insertOne(newClass);
             res.send(result);
 
         })
+
+
 
         // users api
 
@@ -88,14 +114,14 @@ async function run() {
             res.send(result);
         })
 
-        app.get('/users/instructor/:email', verifyJWT, async(req, res)=>{
+        app.get('/users/instructor/:email', verifyJWT, async (req, res) => {
             const email = req.params.email;
             if (req.decoded.email !== email) {
                 res.send({ instructor: false })
             }
-            const query ={email: email};
+            const query = { email: email };
             const user = await usersCollection.findOne(query);
-            const result = {instructor: user?.role === 'instructor'}
+            const result = { instructor: user?.role === 'instructor' }
             res.send(result);
         })
 
