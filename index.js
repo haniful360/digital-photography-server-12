@@ -13,6 +13,22 @@ app.get('/', (req, res) => {
     res.send('summer camp school photography learning...')
 })
 
+// const verifyJWT = (req, res, next) => {
+//     const authorization = req.headers.authorization;
+//     if (!authorization) {
+//         return res.status(401).send({ error: true, message: 'unauthorize access' })
+//     }
+//     const token = authorization.split(' ')[1]
+//     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+//         if (err) {
+//             return res.status(401).send({ error: true, message: 'unauthorize access' })
+//         }
+//         req.decoded = decoded
+//         next();
+
+//     })
+// }
+
 
 
 
@@ -33,7 +49,15 @@ async function run() {
 
         // all collection
         const usersCollection = client.db('photography').collection('users');
+        const instructorCollection = client.db('photography').collection('addClass');
+        
 
+        app.post('/addClass', async(req,res) =>{
+            const newClass = req.body;
+            const result = await instructorCollection.insertOne(newClass);
+            res.send(result);
+
+        })
 
         // users api
 
