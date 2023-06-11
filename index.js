@@ -54,6 +54,8 @@ async function run() {
         const usersCollection = client.db('photography').collection('users');
         const instructorCollection = client.db('photography').collection('addClass');
         const selectedClassCollection = client.db('photography').collection('selectedClass')
+        const paymentsCollection = client.db('photography').collection('payments')
+
 
         // json web token
         app.post('/jwt', async (req, res) => {
@@ -61,7 +63,7 @@ async function run() {
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
                 expiresIn: '2hr'
             })
-             res.send({ token })
+            res.send({ token })
 
         })
 
@@ -71,6 +73,14 @@ async function run() {
             const result = await selectedClassCollection.find().toArray();
             res.send(result);
         })
+
+        app.get('/selectedClass/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await selectedClassCollection.findOne(query);
+            res.send(result);
+        })
+
         app.post('/selectedClass', async (req, res) => {
             const selectClass = req.body;
             const result = await selectedClassCollection.insertOne(selectClass);
@@ -176,21 +186,35 @@ async function run() {
             res.send(result);
         })
 
-        // stripe payment system 
 
-        app.post("/create-payment-intent", async(req, res ) =>{
-            const {price } = req.body;
+        // create-payment-intent
+        app.post("/create-payment-intent", async (req, res) => {
+            const { price } = req.body;
             const amount = price * 100;
             const paymentIntent = await stripe.paymentIntents.create({
-                amount:amount,
-                currency:'usd',
+                amount: amount,
+                currency: 'usd',
                 payment_method_types: ['card'],
 
             })
             res.send({
                 clientSecret: paymentIntent.client_secret,
-              });
+            });
         })
+
+        // payment related api
+        app.get('/payments', async (req, res) => {
+            const result = await paymentsCollection.find().toArray();
+            res.send(result);
+        })
+        app.post('/payments', verifyJWT, async (req, res) => {
+            const payment = req.body;
+            const result = await paymentsCollection.insertOne(payment);
+            const query = req.price;
+            const deleteResult = await selectedClassCollection.deleteOne(query)
+            res.send({ result, deleteResult });
+        })
+
 
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
