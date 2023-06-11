@@ -3,6 +3,7 @@ const cors = require('cors');
 const app = express()
 require('dotenv').config()
 const jwt = require('jsonwebtoken');
+const stripe = require("stripe")(process.env.PAYMENT_SECRET_KEY)
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 
@@ -58,9 +59,9 @@ async function run() {
         app.post('/jwt', async (req, res) => {
             const user = req.body;
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-                expiresIn: '1hr'
+                expiresIn: '2hr'
             })
-            res.send({ token })
+             res.send({ token })
 
         })
 
@@ -117,7 +118,7 @@ async function run() {
         app.get('/users/admin/:email', verifyJWT, async (req, res) => {
             const email = req.params.email;
             if (req.decoded.email !== email) {
-                res.send({ admin: false })
+                return res.send({ admin: false })
             }
             const query = { email: email };
             const user = await usersCollection.findOne(query);
@@ -128,7 +129,7 @@ async function run() {
         app.get('/users/instructor/:email', verifyJWT, async (req, res) => {
             const email = req.params.email;
             if (req.decoded.email !== email) {
-                res.send({ instructor: false })
+                return res.send({ instructor: false })
             }
             const query = { email: email };
             const user = await usersCollection.findOne(query);
@@ -173,6 +174,22 @@ async function run() {
             }
             const result = await usersCollection.updateOne(filter, updateDoc);
             res.send(result);
+        })
+
+        // stripe payment system 
+
+        app.post("/create-payment-intent", async(req, res ) =>{
+            const {price } = req.body;
+            const amount = price * 100;
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount:amount,
+                currency:'usd',
+                payment_method_types: ['card'],
+
+            })
+            res.send({
+                clientSecret: paymentIntent.client_secret,
+              });
         })
 
         await client.db("admin").command({ ping: 1 });
