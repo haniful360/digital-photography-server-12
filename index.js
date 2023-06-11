@@ -67,8 +67,7 @@ async function run() {
 
         })
 
-        // selected class
-
+        // selected class api
         app.get('/selectedClass', async (req, res) => {
             const result = await selectedClassCollection.find().toArray();
             res.send(result);
@@ -86,6 +85,23 @@ async function run() {
             const result = await selectedClassCollection.insertOne(selectClass);
             res.send(result);
         })
+
+        // manage Class
+        app.patch('/addClass/approved/:id', async (req, res) => {
+            const id = req.params.id
+            const filter = { _id: new ObjectId(id) }
+            const updateDoc = {
+                $set: {
+                    status: 'approved'
+                }
+            }
+
+            const result = await instructorCollection.updateOne(filter, updateDoc)
+            res.send(result)
+
+        })
+
+
 
         // add class api
         app.get('/instructor', async (req, res) => {
@@ -118,7 +134,7 @@ async function run() {
 
 
 
-        // users api
+        // manage users api
 
         app.get('/users', async (req, res) => {
             const result = await usersCollection.find().toArray();
@@ -185,6 +201,7 @@ async function run() {
             const result = await usersCollection.updateOne(filter, updateDoc);
             res.send(result);
         })
+
 
 
         // create-payment-intent
