@@ -52,6 +52,7 @@ async function run() {
         // all collection
         const usersCollection = client.db('photography').collection('users');
         const instructorCollection = client.db('photography').collection('addClass');
+        const selectedClassCollection = client.db('photography').collection('selectedClass')
 
         // json web token
         app.post('/jwt', async (req, res) => {
@@ -63,9 +64,19 @@ async function run() {
 
         })
 
+        // selected class
+
+        app.get('/selectedClass', async (req, res) => {
+            const result = await selectedClassCollection.find().toArray();
+            res.send(result);
+        })
+        app.post('/selectedClass', async (req, res) => {
+            const selectClass = req.body;
+            const result = await selectedClassCollection.insertOne(selectClass);
+            res.send(result);
+        })
 
         // add class api
-
         app.get('/instructor', async (req, res) => {
             let query = {};
             if (req.query?.email) {
@@ -73,7 +84,7 @@ async function run() {
             }
             const result = await instructorCollection.find(query).toArray();
             res.send(result);
-            
+
         })
         app.get('/addClass/:id', async (req, res) => {
             const id = req.params.id;
