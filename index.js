@@ -48,7 +48,7 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
 
-        await client.connect();
+        // await client.connect();
 
         // all collection
         const usersCollection = client.db('photography').collection('users');
@@ -99,6 +99,27 @@ async function run() {
             const result = await instructorCollection.updateOne(filter, updateDoc)
             res.send(result)
 
+        })
+
+        app.patch('/addClass/denied/:id', async (req, res) => {
+            const id = req.params.id
+            const filter = { _id: new ObjectId(id) }
+            const updateDoc = {
+                $set: {
+                    status: 'denied'
+                }
+            }
+
+            const result = await instructorCollection.updateOne(filter, updateDoc)
+            res.send(result)
+
+        })
+
+        app.post('/addClass/feedback' , async( req, res) =>{
+           const feedback = req.body;
+           console.log(feedback);
+           const result = await instructorCollection.insertOne(feedback);
+           res.send(result);
         })
 
 
