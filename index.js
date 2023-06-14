@@ -15,7 +15,6 @@ app.get('/', (req, res) => {
     res.send('summer camp school photography learning...')
 })
 
-
 const verifyJWT = (req, res, next) => {
     const authorization = req.headers.authorization;
     if (!authorization) {
@@ -31,10 +30,6 @@ const verifyJWT = (req, res, next) => {
 
     })
 }
-
-
-
-
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ohczye1.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
@@ -88,7 +83,6 @@ async function run() {
 
         app.delete('/selectedClass/:id', async (req, res) => {
             const id = req.params;
-            // console.log(id);
             const query = {_id: new ObjectId(id)}
             const result = await selectedClassCollection.deleteOne(query)
             res.send(result);
@@ -104,7 +98,6 @@ async function run() {
                     status: 'approved'
                 }
             }
-
             const result = await instructorCollection.updateOne(filter, updateDoc)
             res.send(result)
 
@@ -118,7 +111,6 @@ async function run() {
                     status: 'denied'
                 }
             }
-
             const result = await instructorCollection.updateOne(filter, updateDoc)
             res.send(result)
 
@@ -130,7 +122,6 @@ async function run() {
             const result = await instructorCollection.insertOne(feedback);
             res.send(result);
         })
-
 
 
         // add class api
@@ -196,10 +187,8 @@ async function run() {
 
         app.post('/users', async (req, res) => {
             const user = req.body;
-            // console.log(user);
             const query = { email: user.email }
             const existingUser = await usersCollection.findOne(query);
-            // console.log('existingUser', existingUser);
             if (existingUser) {
                 return res.send({ message: 'user already exists' })
             }
@@ -266,7 +255,7 @@ async function run() {
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
-        // Ensures that the client will close when you finish/error
+        
         // await client.close();
     }
 }
