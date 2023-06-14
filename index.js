@@ -86,6 +86,15 @@ async function run() {
             res.send(result);
         })
 
+        app.delete('/selectedClass/:id', async (req, res) => {
+            const id = req.params;
+            // console.log(id);
+            const query = {_id: new ObjectId(id)}
+            const result = await selectedClassCollection.deleteOne(query)
+            res.send(result);
+
+        })
+
         // manage Class
         app.patch('/addClass/approved/:id', async (req, res) => {
             const id = req.params.id
@@ -115,11 +124,11 @@ async function run() {
 
         })
 
-        app.post('/addClass/feedback' , async( req, res) =>{
-           const feedback = req.body;
-           console.log(feedback);
-           const result = await instructorCollection.insertOne(feedback);
-           res.send(result);
+        app.post('/addClass/feedback', async (req, res) => {
+            const feedback = req.body;
+            console.log(feedback);
+            const result = await instructorCollection.insertOne(feedback);
+            res.send(result);
         })
 
 
